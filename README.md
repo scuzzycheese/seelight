@@ -1,6 +1,6 @@
 # seelight
 
-A new Flutter project.
+A front to teralight. This allows you to query the backend for power statuses and display them to users.
 
 ## Getting Started
 
