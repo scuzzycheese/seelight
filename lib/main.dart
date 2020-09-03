@@ -8,24 +8,16 @@ import 'package:charts_flutter/flutter.dart' as charts;
 
 import 'package:flutter_gauge/flutter_gauge.dart';
 
-
 void main() {
-
-
-
   runApp(SeeLightMainWidget());
-
-
-
 }
 
 class SeeLightMainWidget extends StatefulWidget {
   @override
   _SeeLightMainWidget createState() => _SeeLightMainWidget();
-
 }
-class _SeeLightMainWidget extends State<SeeLightMainWidget> {
 
+class _SeeLightMainWidget extends State<SeeLightMainWidget> {
   Status _inverterStatus;
 
   void setStatus(Status status) {
@@ -34,17 +26,18 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
     });
   }
 
-
   @override
   Future<void> initState() {
     super.initState();
 
-    new Timer.periodic(new Duration(seconds: 2), (Timer t) => {
-      fetchStatus().then((value) {
+    new Timer.periodic(
+        new Duration(seconds: 2),
+        (Timer t) => {
+              fetchStatus().then((value) {
 //        print("watts: " + value.ac_output_watts.toString());
-        setStatus(value);
-      })
-    });
+                setStatus(value);
+              })
+            });
   }
 
   @override
@@ -65,50 +58,50 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
               title: Text('SeeLight'),
             ),
           ),
-
           body: TabBarView(
             children: [
               GridView.count(
                 // Create a grid with 2 columns. If you change the scrollDirection to
                 // horizontal, this produces 2 rows.
-                  crossAxisCount: 2,
-                  children: [
-                  FlutterGauge(
-                      hand: Hand.none,
-                      handSize: 30,
-                      width: 200,
-                      widthCircle: 100,
-                      index: _inverterStatus.load_percent.toDouble(),
-                      fontFamily: "Iran",
-                      end: 120,
-                      numberInAndOut: NumberInAndOut.inside,
-                      number: Number.endAndStart,
-                      secondsMarker: SecondsMarker.minutes,
-                      inactiveColor: Colors.black12,
-                      activeColor: Colors.black,
-                      isCircle: false,
-                      counterAlign: CounterAlign.center,
-                      counterStyle: TextStyle(
-                        color: Colors.black,
-                        fontSize: 25,
-                      ))
+                crossAxisCount: 2,
+                children: [
+                  Text("hello"),
+                  Stack(
+                    children: [
+                      Positioned(
+                          child: FlutterGauge(
+                              handSize: 10,
+                              circleColor: Colors.blueAccent,
+                              index: _inverterStatus.load_percent.toDouble(),
+                              fontFamily: "Iran",
+                              end: 100,
+                              number: Number.endAndCenterAndStart,
+                              numberInAndOut: NumberInAndOut.inside,
+                              counterAlign: CounterAlign.center,
+                              secondsMarker: SecondsMarker.secondsAndMinute,
+                              isCircle: false,
+                              hand: Hand.short,
+                              counterStyle: TextStyle(
+                                color: Colors.black,
+                                fontSize: 25,
+                              )),
+                      ),
+                      Center(
+                        child: Container(
 
-                    //FlutterGauge(
-                    // inactiveColor: Colors.white38,
-                    // activeColor: Colors.white,
-                    // handSize: 30,
-                    // width: 200,
-                    // index: 65.0,
-                    // fontFamily: "Iran",
-                    // end: 400,
-                    // number: Number.none,
-                    // secondsMarker: SecondsMarker.minutes,
-                    // isCircle: false,
-                    // hand: Hand.none,
-                    // counterAlign: CounterAlign.center,
-                    // counterStyle: TextStyle(color: Colors.white,fontSize: 30,),isDecimal: false,))
+                            alignment: Alignment(0.0, 0.3),
+                            child: Text(
+                              "Load %",
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                            )
+                        ),
 
 
+                      ),
+                    ],
+                  )
                 ],
               ),
               Icon(Icons.security_outlined),
@@ -118,11 +111,7 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
       ),
     );
   }
-
 }
-
-
-
 
 //I might be able to populate this with serialization rather.
 @JsonSerializable()
@@ -145,23 +134,22 @@ class Status {
   final int battery_discharge_current;
 
   Status(
-    this.ac_input_voltage,
-    this.ac_input_frequency,
-    this.ac_output_voltage,
-    this.ac_output_frequency,
-    this.ac_output_va,
-    this.ac_output_watts,
-    this.load_percent,
-    this.bus_voltage,
-    this.battery_voltage,
-    this.battery_charging_current,
-    this.battery_capacity_percent,
-    this.inverter_heatsink_temp,
-    this.pv_input_current,
-    this.pv_input_voltage,
-    this.battery_voltage_from_scc,
-    this.battery_discharge_current
-  );
+      this.ac_input_voltage,
+      this.ac_input_frequency,
+      this.ac_output_voltage,
+      this.ac_output_frequency,
+      this.ac_output_va,
+      this.ac_output_watts,
+      this.load_percent,
+      this.bus_voltage,
+      this.battery_voltage,
+      this.battery_charging_current,
+      this.battery_capacity_percent,
+      this.inverter_heatsink_temp,
+      this.pv_input_current,
+      this.pv_input_voltage,
+      this.battery_voltage_from_scc,
+      this.battery_discharge_current);
 
   factory Status.fromJson(Map<String, dynamic> json) {
     return Status(
@@ -180,8 +168,7 @@ class Status {
         json['pv_input_current'],
         json['pv_input_voltage'],
         json['battery_voltage_from_scc'],
-        json['battery_discharge_current']
-    );
+        json['battery_discharge_current']);
   }
 
 //  factory Status.fromJson(Map<String, dynamic> json) => _$StatusFromJson(json);
@@ -201,4 +188,3 @@ Future<Status> fetchStatus() async {
     throw Exception('Failed to power information from inverter');
   }
 }
-
