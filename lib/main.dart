@@ -112,7 +112,7 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                     child: Column(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(5),
                           child: LinearPercentIndicator(
                             leading: Text("0"),
                             trailing: Text("100"),
@@ -124,14 +124,28 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                           ),
                         ),
                         Container(
-                            padding: const EdgeInsets.all(20),
+                            padding: const EdgeInsets.all(5),
+                            alignment: Alignment.centerLeft,
                             child: Text(
-                                "Battery Voltage: " + _inverterStatus.battery_voltage.toString(),
+                                "Battery Voltage: " + _inverterStatus.battery_voltage.toString() + "v",
                                 textAlign: TextAlign.left,
                                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))),
                         Container(
-                            padding: const EdgeInsets.all(20),
+                            padding: const EdgeInsets.all(5),
+                            alignment: Alignment.centerLeft,
                             child: Text("Load Watts: " + _inverterStatus.ac_output_watts.toString(),
+                                textAlign: TextAlign.left,
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))),
+                        Container(
+                            padding: const EdgeInsets.all(5),
+                            alignment: Alignment.centerLeft,
+                            child: Text("Battery Charge Current: " + _inverterStatus.battery_charging_current.toString() + " amps",
+                                textAlign: TextAlign.left,
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))),
+                        Container(
+                            padding: const EdgeInsets.all(5),
+                            alignment: Alignment.centerLeft,
+                            child: Text("Battery Discharge Current: " + _inverterStatus.battery_discharge_current.toString() + " amps",
                                 textAlign: TextAlign.left,
                                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))),
                       ],
