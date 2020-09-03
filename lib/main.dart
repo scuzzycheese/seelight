@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:charts_flutter/flutter.dart' as charts;
 
 import 'package:flutter_gauge/flutter_gauge.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
 
 void main() {
   runApp(SeeLightMainWidget());
@@ -18,7 +20,7 @@ class SeeLightMainWidget extends StatefulWidget {
 }
 
 class _SeeLightMainWidget extends State<SeeLightMainWidget> {
-  Status _inverterStatus;
+  Status _inverterStatus = Status.allZero();
 
   void setStatus(Status status) {
     setState(() {
@@ -34,7 +36,10 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
         new Duration(seconds: 2),
         (Timer t) => {
               fetchStatus().then((value) {
-//        print("watts: " + value.ac_output_watts.toString());
+
+
+
+
                 setStatus(value);
               })
             });
@@ -43,6 +48,8 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      //theme: ThemeData.dark(),
+      theme: ThemeData.light(),
       home: DefaultTabController(
         length: 2,
         child: Scaffold(
@@ -65,13 +72,11 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                 // horizontal, this produces 2 rows.
                 crossAxisCount: 2,
                 children: [
-                  Text("hello"),
                   Stack(
                     children: [
                       Positioned(
                           child: FlutterGauge(
                               handSize: 10,
-                              circleColor: Colors.blueAccent,
                               index: _inverterStatus.load_percent.toDouble(),
                               fontFamily: "Iran",
                               end: 100,
@@ -82,7 +87,7 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                               isCircle: false,
                               hand: Hand.short,
                               counterStyle: TextStyle(
-                                color: Colors.black,
+                                color: (Theme.of(context) == ThemeData.dark()) ? Colors.white : Colors.black,
                                 fontSize: 25,
                               )),
                       ),
@@ -101,7 +106,37 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
 
                       ),
                     ],
-                  )
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(30),
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          child: LinearPercentIndicator(
+                            leading: Text("0"),
+                            trailing: Text("100"),
+                            center: Text("Battery " + _inverterStatus.battery_capacity_percent.toString() + " %"),
+                            animation: true,
+                            lineHeight: 20,
+                            progressColor: Colors.green,
+                            percent: (_inverterStatus.battery_capacity_percent / 100 ).toDouble(),
+                          ),
+                        ),
+                        Container(
+                            padding: const EdgeInsets.all(20),
+                            child: Text(
+                                "Battery Voltage: " + _inverterStatus.battery_voltage.toString(),
+                                textAlign: TextAlign.left,
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))),
+                        Container(
+                            padding: const EdgeInsets.all(20),
+                            child: Text("Load Watts: " + _inverterStatus.ac_output_watts.toString(),
+                                textAlign: TextAlign.left,
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))),
+                      ],
+                    ),
+                  ),
                 ],
               ),
               Icon(Icons.security_outlined),
@@ -151,6 +186,10 @@ class Status {
       this.battery_voltage_from_scc,
       this.battery_discharge_current);
 
+  factory Status.allZero() {
+    return Status(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  }
+
   factory Status.fromJson(Map<String, dynamic> json) {
     return Status(
         json['ac_input_voltage'],
@@ -160,7 +199,7 @@ class Status {
         json['ac_output_va'],
         json['ac_output_watts'],
         json['load_percent'],
-        json['bus_voltage§'],
+        json['bus_voltage'],
         json['battery_voltage'],
         json['battery_charging_current'],
         json['battery_capacity_percent'],
@@ -177,7 +216,7 @@ class Status {
 }
 
 Future<Status> fetchStatus() async {
-  final response = await http.get('http://192.168.0.122/status');
+  final response = await http.get('http://theworst.zapto.org/api/status');
 
   if (response.statusCode == 200) {
     // If the server did return a 200 OK response, then parse the JSON.

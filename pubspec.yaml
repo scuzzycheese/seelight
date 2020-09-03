@@ -27,6 +27,7 @@ dependencies:
   http: ^0.12.2
   json_annotation: ^3.0.0
   flutter_gauge: ^1.0.8
+  percent_indicator: ^2.1.5
 
 
   # The following adds the Cupertino Icons font to your application.
