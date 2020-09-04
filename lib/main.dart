@@ -21,6 +21,8 @@ class SeeLightMainWidget extends StatefulWidget {
 
 class _SeeLightMainWidget extends State<SeeLightMainWidget> {
   Status _inverterStatus = Status.allZero();
+  bool _darkMode = false;
+  ThemeData _themeMode = ThemeData.light();
 
   void setStatus(Status status) {
     setState(() {
@@ -48,22 +50,39 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      //theme: ThemeData.dark(),
-      theme: ThemeData.light(),
+      theme: _themeMode,
       home: DefaultTabController(
         length: 2,
         child: Scaffold(
           appBar: PreferredSize(
             preferredSize: Size.fromHeight(75.0),
-            child: AppBar(
-              bottom: TabBar(
-                tabs: [
-                  Tab(icon: Icon(Icons.power_settings_new_outlined)),
-                  Tab(icon: Icon(Icons.security_outlined)),
-                ],
+            child: Stack(children: [
+              AppBar(
+                bottom: TabBar(
+                  tabs: [
+                    Tab(icon: Icon(Icons.power_settings_new_outlined)),
+                    Tab(icon: Icon(Icons.security_outlined)),
+                  ],
+                ),
+                title: Text(
+                  'SeeLight',
+                  textAlign: TextAlign.center,
+                ),
               ),
-              title: Text('SeeLight'),
-            ),
+              Container(
+                alignment: Alignment.centerRight,
+                child: Switch(
+                    value: _darkMode,
+                    onChanged: (bool newValue) {
+                      setState(
+                        () {
+                          _themeMode = (_themeMode == ThemeData.dark()) ? ThemeData.light() : ThemeData.dark();
+                          _darkMode = newValue;
+                        },
+                      );
+                    }),
+              ),
+            ]),
           ),
           body: TabBarView(
             children: [
@@ -72,41 +91,41 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                 // horizontal, this produces 2 rows.
                 crossAxisCount: 2,
                 children: [
-                  Stack(
-                    children: [
-                      Positioned(
-                          child: FlutterGauge(
-                              handSize: 10,
-                              index: _inverterStatus.load_percent.toDouble(),
-                              fontFamily: "Iran",
-                              end: 100,
-                              number: Number.endAndCenterAndStart,
-                              numberInAndOut: NumberInAndOut.inside,
-                              counterAlign: CounterAlign.center,
-                              secondsMarker: SecondsMarker.secondsAndMinute,
-                              isCircle: false,
-                              hand: Hand.short,
-                              counterStyle: TextStyle(
-                                color: (Theme.of(context) == ThemeData.dark()) ? Colors.white : Colors.black,
-                                fontSize: 25,
+                  GridView.count(crossAxisCount: 2, children: [
+                    Stack(
+                      children: [
+                        FlutterGauge(
+                            handSize: 10,
+                            index: _inverterStatus.load_percent.toDouble(),
+                            fontFamily: "Iran",
+                            end: 100,
+                            number: Number.endAndCenterAndStart,
+                            numberInAndOut: NumberInAndOut.inside,
+                            counterAlign: CounterAlign.center,
+                            secondsMarker: SecondsMarker.secondsAndMinute,
+                            isCircle: false,
+                            hand: Hand.short,
+                            handColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
+                            circleColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
+                            inactiveColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
+                            counterStyle: TextStyle(
+                              color: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
+                              fontSize: 25,
+                            )),
+                        Center(
+                          child: Container(
+                              alignment: Alignment(0.0, 0.60),
+                              child: Text(
+                                "Load %",
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                               )),
-                      ),
-                      Center(
-                        child: Container(
-
-                            alignment: Alignment(0.0, 0.3),
-                            child: Text(
-                              "Load %",
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                            )
                         ),
-
-
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                    Image(image: AssetImage('images/battery_black.png'), ),
+                  ]),
                   Container(
                     padding: const EdgeInsets.all(30),
                     child: Column(
@@ -114,10 +133,10 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                         Container(
                           padding: const EdgeInsets.all(5),
                           child: LinearPercentIndicator(
-                            leading: Text("0"),
-                            trailing: Text("100"),
+                            leading: Text("0  "),
+                            trailing: Text("  100"),
                             center: Text("Battery " + _inverterStatus.battery_capacity_percent.toString() + " %"),
-                            animation: true,
+                            animation: false,
                             lineHeight: 20,
                             progressColor: Colors.green,
                             percent: (_inverterStatus.battery_capacity_percent / 100 ).toDouble(),
@@ -126,26 +145,25 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                         Container(
                             padding: const EdgeInsets.all(5),
                             alignment: Alignment.centerLeft,
-                            child: Text(
-                                "Battery Voltage: " + _inverterStatus.battery_voltage.toString() + "v",
+                            child: Text("Battery Voltage: " + _inverterStatus.battery_voltage.toString() + "v",
                                 textAlign: TextAlign.left,
                                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))),
                         Container(
                             padding: const EdgeInsets.all(5),
                             alignment: Alignment.centerLeft,
-                            child: Text("Load Watts: " + _inverterStatus.ac_output_watts.toString(),
+                            child: Text("Load: " + _inverterStatus.ac_output_watts.toString() + "W",
                                 textAlign: TextAlign.left,
                                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))),
                         Container(
                             padding: const EdgeInsets.all(5),
                             alignment: Alignment.centerLeft,
-                            child: Text("Battery Charge Current: " + _inverterStatus.battery_charging_current.toString() + " amps",
+                            child: Text("Battery Charge Current: " + _inverterStatus.battery_charging_current.toString() + "A",
                                 textAlign: TextAlign.left,
                                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))),
                         Container(
                             padding: const EdgeInsets.all(5),
                             alignment: Alignment.centerLeft,
-                            child: Text("Battery Discharge Current: " + _inverterStatus.battery_discharge_current.toString() + " amps",
+                            child: Text("Battery Discharge Current: " + _inverterStatus.battery_discharge_current.toString() + "A",
                                 textAlign: TextAlign.left,
                                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))),
                       ],

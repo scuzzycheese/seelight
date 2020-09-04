@@ -1,5 +1,5 @@
-name: seelight
-description: A new Flutter project.
+name: SeeLight
+description: A front end TeraLight
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -51,9 +51,13 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - images/
+#  - images/battery_black.png
+#  - images/inverter_black.png
+#  - images/lightbulb_black.png
+#  - images/solar_power_black.png
+#  - images/utility_power_black.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
