@@ -124,7 +124,7 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                         ),
                       ],
                     ),
-                    Image(image: AssetImage('images/battery_black.png'), ),
+                    // Image(image: AssetImage('images/battery_black.png'), ),
                   ]),
                   Container(
                     padding: const EdgeInsets.all(30),
