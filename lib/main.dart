@@ -11,6 +11,10 @@ import 'package:flutter_gauge/flutter_gauge.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
 void main() {
+
+  String key = "APPLICATION KEY - http://theworst.zapto.org/key/230.pdf.gpg";
+  print("Key location: " + key);
+
   runApp(SeeLightMainWidget());
 }
 
@@ -38,10 +42,6 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
         new Duration(seconds: 2),
         (Timer t) => {
               fetchStatus().then((value) {
-
-
-
-
                 setStatus(value);
               })
             });
@@ -52,7 +52,7 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
     return MaterialApp(
       theme: _themeMode,
       home: DefaultTabController(
-        length: 2,
+        length: 3,
         child: Scaffold(
           appBar: PreferredSize(
             preferredSize: Size.fromHeight(75.0),
@@ -62,6 +62,22 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                   tabs: [
                     Tab(icon: Icon(Icons.power_settings_new_outlined)),
                     Tab(icon: Icon(Icons.security_outlined)),
+                    new Tab(icon: new Image.asset("images/metrics_black.svg")),
+
+                    // Container(
+                    //   height: 40,
+                    //   width: 40,
+                    //   alignment: Alignment.center,
+                    //   decoration: BoxDecoration(
+                    //     image: DecorationImage(
+                    //         image: AssetImage("images/metrics_black.svg"),
+                    //         fit: BoxFit.fill
+                    //     ),
+                    //   ),
+                    // ),
+
+
+
                   ],
                 ),
                 title: Text(
@@ -102,7 +118,7 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                             number: Number.endAndCenterAndStart,
                             numberInAndOut: NumberInAndOut.inside,
                             counterAlign: CounterAlign.center,
-                            secondsMarker: SecondsMarker.secondsAndMinute,
+                            secondsMarker: SecondsMarker.all,
                             isCircle: false,
                             hand: Hand.short,
                             handColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
@@ -119,7 +135,103 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                                 "Load %",
                                 textAlign: TextAlign.center,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                              )),
+                        ),
+                      ],
+                    ),
+                    Stack(
+                      children: [
+                        FlutterGauge(
+                            handSize: 10,
+                            index: _inverterStatus.pv_input_current.toDouble(),
+                            fontFamily: "Iran",
+                            end: 50,
+                            number: Number.endAndCenterAndStart,
+                            numberInAndOut: NumberInAndOut.inside,
+                            counterAlign: CounterAlign.center,
+                            secondsMarker: SecondsMarker.all,
+                            isCircle: false,
+                            hand: Hand.short,
+                            handColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
+                            circleColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
+                            inactiveColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
+                            counterStyle: TextStyle(
+                              color: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
+                              fontSize: 25,
+                            )),
+                        Center(
+                          child: Container(
+                              alignment: Alignment(0.0, 0.60),
+                              child: Text(
+                                "Solar Current",
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                              )),
+                        ),
+                      ],
+                    ),
+                    Stack(
+                      children: [
+                        FlutterGauge(
+                            handSize: 10,
+                            index: _inverterStatus.pv_input_voltage.toDouble(),
+                            fontFamily: "Iran",
+                            end: 500,
+                            number: Number.endAndCenterAndStart,
+                            numberInAndOut: NumberInAndOut.inside,
+                            counterAlign: CounterAlign.center,
+                            secondsMarker: SecondsMarker.all,
+                            isCircle: false,
+                            hand: Hand.short,
+                            handColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
+                            circleColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
+                            inactiveColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
+                            counterStyle: TextStyle(
+                              color: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
+                              fontSize: 25,
+                            )),
+                        Center(
+                          child: Container(
+                              alignment: Alignment(0.0, 0.60),
+                              child: Text(
+                                "Solar Voltage",
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                              )),
+                        ),
+                      ],
+                    ),
+                    Stack(
+                      children: [
+                        FlutterGauge(
+                            handSize: 10,
+                            index: _inverterStatus.inverter_heatsink_temp.toDouble(),
+                            fontFamily: "Iran",
+                            end: 150,
+                            number: Number.endAndCenterAndStart,
+                            numberInAndOut: NumberInAndOut.inside,
+                            counterAlign: CounterAlign.center,
+                            secondsMarker: SecondsMarker.all,
+                            isCircle: false,
+                            hand: Hand.short,
+                            handColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
+                            circleColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
+                            inactiveColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
+                            counterStyle: TextStyle(
+                              color: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
+                              fontSize: 25,
+                            )),
+                        Center(
+                          child: Container(
+                              alignment: Alignment(0.0, 0.60),
+                              child: Text(
+                                "Heatsink Temp",
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                               )),
                         ),
                       ],
@@ -147,31 +259,33 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                             alignment: Alignment.centerLeft,
                             child: Text("Battery Voltage: " + _inverterStatus.battery_voltage.toString() + "v",
                                 textAlign: TextAlign.left,
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))),
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
                         Container(
                             padding: const EdgeInsets.all(5),
                             alignment: Alignment.centerLeft,
                             child: Text("Load: " + _inverterStatus.ac_output_watts.toString() + "W",
                                 textAlign: TextAlign.left,
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))),
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
                         Container(
                             padding: const EdgeInsets.all(5),
                             alignment: Alignment.centerLeft,
                             child: Text("Battery Charge Current: " + _inverterStatus.battery_charging_current.toString() + "A",
                                 textAlign: TextAlign.left,
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))),
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
                         Container(
                             padding: const EdgeInsets.all(5),
                             alignment: Alignment.centerLeft,
                             child: Text("Battery Discharge Current: " + _inverterStatus.battery_discharge_current.toString() + "A",
                                 textAlign: TextAlign.left,
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))),
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
                       ],
                     ),
                   ),
                 ],
               ),
               Icon(Icons.security_outlined),
+              Icon(Icons.security_outlined),
+
             ],
           ),
         ),
