@@ -9,6 +9,7 @@ import 'package:charts_flutter/flutter.dart' as charts;
 
 import 'package:flutter_gauge/flutter_gauge.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:bezier_chart/bezier_chart.dart';
 
 void main() {
 
@@ -23,14 +24,48 @@ class SeeLightMainWidget extends StatefulWidget {
   _SeeLightMainWidget createState() => _SeeLightMainWidget();
 }
 
+
+class TimeSeriesWatts {
+  final DateTime time;
+  final int watts;
+
+  TimeSeriesWatts(this.time, this.watts);
+}
+
 class _SeeLightMainWidget extends State<SeeLightMainWidget> {
   Status _inverterStatus = Status.allZero();
   bool _darkMode = false;
   ThemeData _themeMode = ThemeData.light();
 
+  List<TimeSeriesWatts> _timeseries_watts = [];
+
+  List<charts.Series<TimeSeriesWatts, DateTime>> _watts_timeseries = [
+    charts.Series(
+      id: "watts",
+      colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+      domainFn: (TimeSeriesWatts watts, _) => watts.time,
+      measureFn: (TimeSeriesWatts watts, _) => watts.watts,
+      data: []
+    ),
+  ];
+
   void setStatus(Status status) {
     setState(() {
       _inverterStatus = status;
+    });
+  }
+
+  void addWatts(Status status) {
+    setState(() {
+      _watts_timeseries.last.data.add(
+        TimeSeriesWatts(DateTime.now(), status.ac_output_watts)
+      );
+
+      if(_timeseries_watts.length >= 1440) {
+        //Remove the last minute data point older than a day
+        _timeseries_watts.removeAt(0);
+      }
+      _timeseries_watts.add(TimeSeriesWatts(DateTime.now(), _inverterStatus.ac_output_watts));
     });
   }
 
@@ -45,6 +80,16 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                 setStatus(value);
               })
             });
+
+
+    new Timer.periodic(
+        new Duration(minutes: 1),
+            (Timer t) => {
+          fetchStatus().then((value) {
+            addWatts(value);
+          })
+        });
+
   }
 
   @override
@@ -61,23 +106,8 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                 bottom: TabBar(
                   tabs: [
                     Tab(icon: Icon(Icons.power_settings_new_outlined)),
+                    Tab(icon: Image(image: AssetImage("images/metrics_white.png"))),
                     Tab(icon: Icon(Icons.security_outlined)),
-                    new Tab(icon: new Image.asset("images/metrics_black.svg")),
-
-                    // Container(
-                    //   height: 40,
-                    //   width: 40,
-                    //   alignment: Alignment.center,
-                    //   decoration: BoxDecoration(
-                    //     image: DecorationImage(
-                    //         image: AssetImage("images/metrics_black.svg"),
-                    //         fit: BoxFit.fill
-                    //     ),
-                    //   ),
-                    // ),
-
-
-
                   ],
                 ),
                 title: Text(
@@ -283,7 +313,43 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                   ),
                 ],
               ),
-              Icon(Icons.security_outlined),
+              GridView.count(crossAxisCount: 1, children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 30),
+                  child: Column(
+                    children: [
+
+                      Container(
+                          padding: const EdgeInsets.all(5),
+                          alignment: Alignment.center,
+                          child: Text("Watts over 1 day.",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
+
+                      Container(
+                          padding: const EdgeInsets.all(10),
+                          height: 200,
+                          // width: 750,
+                          child: charts.TimeSeriesChart(
+                            _watts_timeseries,
+                            //defaultRenderer: new charts.BarRendererConfig<DateTime>(),
+                            animate: false,
+                            customSeriesRenderers: [
+                              charts.LineRendererConfig(
+                                customRendererId: "area",
+                                includeArea: true,
+                                stacked: true
+                              )
+                            ],
+                            defaultInteractions: false,
+                            behaviors: [new charts.SelectNearest(), new charts.DomainHighlighter()],
+                          )
+                      ),
+
+                    ],
+                  )
+                )
+              ]),
               Icon(Icons.security_outlined),
 
             ],
