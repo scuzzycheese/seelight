@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'package:SeeLight/watts_gauge.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'package:flutter/material.dart';
@@ -138,134 +139,10 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                 crossAxisCount: 2,
                 children: [
                   GridView.count(crossAxisCount: 2, children: [
-                    Stack(
-                      children: [
-                        FlutterGauge(
-                            handSize: 10,
-                            index: _inverterStatus.load_percent.toDouble(),
-                            fontFamily: "Iran",
-                            end: 100,
-                            number: Number.endAndCenterAndStart,
-                            numberInAndOut: NumberInAndOut.inside,
-                            counterAlign: CounterAlign.center,
-                            secondsMarker: SecondsMarker.all,
-                            isCircle: false,
-                            hand: Hand.short,
-                            handColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
-                            circleColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
-                            inactiveColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
-                            counterStyle: TextStyle(
-                              color: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
-                              fontSize: 25,
-                            )),
-                        Center(
-                          child: Container(
-                              alignment: Alignment(0.0, 0.60),
-                              child: Text(
-                                "Load %",
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                              )),
-                        ),
-                      ],
-                    ),
-                    Stack(
-                      children: [
-                        FlutterGauge(
-                            handSize: 10,
-                            index: _inverterStatus.pv_input_current.toDouble(),
-                            fontFamily: "Iran",
-                            end: 50,
-                            number: Number.endAndCenterAndStart,
-                            numberInAndOut: NumberInAndOut.inside,
-                            counterAlign: CounterAlign.center,
-                            secondsMarker: SecondsMarker.all,
-                            isCircle: false,
-                            hand: Hand.short,
-                            handColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
-                            circleColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
-                            inactiveColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
-                            counterStyle: TextStyle(
-                              color: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
-                              fontSize: 25,
-                            )),
-                        Center(
-                          child: Container(
-                              alignment: Alignment(0.0, 0.60),
-                              child: Text(
-                                "Solar Current",
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                              )),
-                        ),
-                      ],
-                    ),
-                    Stack(
-                      children: [
-                        FlutterGauge(
-                            handSize: 10,
-                            index: _inverterStatus.pv_input_voltage.toDouble(),
-                            fontFamily: "Iran",
-                            end: 500,
-                            number: Number.endAndCenterAndStart,
-                            numberInAndOut: NumberInAndOut.inside,
-                            counterAlign: CounterAlign.center,
-                            secondsMarker: SecondsMarker.all,
-                            isCircle: false,
-                            hand: Hand.short,
-                            handColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
-                            circleColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
-                            inactiveColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
-                            counterStyle: TextStyle(
-                              color: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
-                              fontSize: 25,
-                            )),
-                        Center(
-                          child: Container(
-                              alignment: Alignment(0.0, 0.60),
-                              child: Text(
-                                "Solar Voltage",
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                              )),
-                        ),
-                      ],
-                    ),
-                    Stack(
-                      children: [
-                        FlutterGauge(
-                            handSize: 10,
-                            index: _inverterStatus.inverter_heatsink_temp.toDouble(),
-                            fontFamily: "Iran",
-                            end: 150,
-                            number: Number.endAndCenterAndStart,
-                            numberInAndOut: NumberInAndOut.inside,
-                            counterAlign: CounterAlign.center,
-                            secondsMarker: SecondsMarker.all,
-                            isCircle: false,
-                            hand: Hand.short,
-                            handColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
-                            circleColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
-                            inactiveColor: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
-                            counterStyle: TextStyle(
-                              color: (_themeMode == ThemeData.dark()) ? Colors.white : Colors.black,
-                              fontSize: 25,
-                            )),
-                        Center(
-                          child: Container(
-                              alignment: Alignment(0.0, 0.60),
-                              child: Text(
-                                "Heatsink Temp",
-                                textAlign: TextAlign.center,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                              )),
-                        ),
-                      ],
-                    ),
+                    SeeLightGauge( themeMode: _themeMode, gaugeValue: _inverterStatus.load_percent.toDouble(), end: 100, label: "Load %", ),
+                    SeeLightGauge( themeMode: _themeMode, gaugeValue: _inverterStatus.pv_input_current.toDouble(), end: 100, label: "Solar Current", ),
+                    SeeLightGauge( themeMode: _themeMode, gaugeValue: _inverterStatus.pv_input_voltage.toDouble(), end: 100, label: "Solar Voltage", ),
+                    SeeLightGauge( themeMode: _themeMode, gaugeValue: _inverterStatus.inverter_heatsink_temp.toDouble(), end: 100, label: "Heatsink Temp", ),
                     // Image(image: AssetImage('images/battery_black.png'), ),
                   ]),
                   Container(
