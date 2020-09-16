@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'package:SeeLight/watts_gauge.dart';
+import 'package:SeeLight/EightBall.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'package:flutter/material.dart';
@@ -98,7 +99,7 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
     return MaterialApp(
       theme: _themeMode,
       home: DefaultTabController(
-        length: 3,
+        length: 4,
         child: Scaffold(
           appBar: PreferredSize(
             preferredSize: Size.fromHeight(75.0),
@@ -109,6 +110,7 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                     Tab(icon: Icon(Icons.power_settings_new_outlined)),
                     Tab(icon: Image(image: AssetImage("images/metrics_white.png"))),
                     Tab(icon: Icon(Icons.security_outlined)),
+                    Tab(icon: Icon(Icons.icecream)),
                   ],
                 ),
                 title: Text(
@@ -228,7 +230,7 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                 )
               ]),
               Icon(Icons.security_outlined),
-
+              new EightBallWidget(),
             ],
           ),
         ),
