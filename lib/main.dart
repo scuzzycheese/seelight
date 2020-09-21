@@ -1,23 +1,23 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'package:SeeLight/watts_gauge.dart';
 import 'package:SeeLight/eightBall.dart';
+import 'package:flutter/rendering.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:logging/logging.dart';
 
-import 'package:flutter_gauge/flutter_gauge.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
-import 'package:bezier_chart/bezier_chart.dart';
+
+
+final log = Logger("Main");
 
 void main() {
-
-  String key = "APPLICATION KEY - http://theworst.zapto.org/key/230.pdf.gpg";
-  print("Key location: " + key);
-
   runApp(SeeLightMainWidget());
 }
 
@@ -38,18 +38,8 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
   Status _inverterStatus = Status.allZero();
   bool _darkMode = false;
   ThemeData _themeMode = ThemeData.light();
+  String _log = "SeeLight Log.\n";
 
-  List<TimeSeriesWatts> _timeseries_watts = [];
-
-  List<charts.Series<TimeSeriesWatts, DateTime>> _watts_timeseries = [
-    charts.Series(
-      id: "watts",
-      colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-      domainFn: (TimeSeriesWatts watts, _) => watts.time,
-      measureFn: (TimeSeriesWatts watts, _) => watts.watts,
-      data: []
-    ),
-  ];
 
   void setStatus(Status status) {
     setState(() {
@@ -57,17 +47,24 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
     });
   }
 
+  //TODO: keep a rolling average for like 10 minutes, 1 hour etc.
+  List<charts.Series<TimeSeriesWatts, DateTime>> _watts_timeseries = [
+    charts.Series(
+        id: "watts",
+        colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+        domainFn: (TimeSeriesWatts watts, _) => watts.time,
+        measureFn: (TimeSeriesWatts watts, _) => watts.watts,
+        data: []
+    ),
+  ];
+
   void addWatts(Status status) {
     setState(() {
-      _watts_timeseries.last.data.add(
-        TimeSeriesWatts(DateTime.now(), status.ac_output_watts)
-      );
-
-      if(_timeseries_watts.length >= 1440) {
+      if(_watts_timeseries.length >= 1440) {
         //Remove the last minute data point older than a day
-        _timeseries_watts.removeAt(0);
+        _watts_timeseries.removeAt(0);
       }
-      _timeseries_watts.add(TimeSeriesWatts(DateTime.now(), _inverterStatus.ac_output_watts));
+      _watts_timeseries.last.data.add(TimeSeriesWatts(DateTime.now(), status.ac_output_watts));
     });
   }
 
@@ -83,14 +80,18 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
               })
             });
 
-
     new Timer.periodic(
         new Duration(minutes: 1),
-            (Timer t) => {
-          fetchStatus().then((value) {
-            addWatts(value);
-          })
-        });
+        (Timer t) => {
+              fetchStatus().then((value) {
+                addWatts(value);
+              })
+            });
+
+    Logger.root.level = Level.WARNING;
+    Logger.root.onRecord.listen((record) {
+      _log += "${record.time} - [${record.level.name}]: ${record.message}\n";
+    });
 
   }
 
@@ -99,7 +100,7 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
     return MaterialApp(
       theme: _themeMode,
       home: DefaultTabController(
-        length: 4,
+        length: 5,
         child: Scaffold(
           appBar: PreferredSize(
             preferredSize: Size.fromHeight(75.0),
@@ -108,8 +109,10 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                 bottom: TabBar(
                   tabs: [
                     Tab(icon: Icon(Icons.power_settings_new_outlined)),
-                    Tab(icon: Image(image: AssetImage("images/metrics_white.png"))),
+                    // Tab(icon: Image(image: AssetImage("images/metrics_white.png"))),
+                    Tab(icon: Icon(Icons.assessment)),
                     Tab(icon: Icon(Icons.security_outlined)),
+                    Tab(icon: Icon(Icons.subject)),
                     Tab(icon: Icon(Icons.icecream)),
                   ],
                 ),
@@ -230,7 +233,33 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                 )
               ]),
               Icon(Icons.security_outlined),
-              new EightBallWidget(),
+              Column(
+                  // primary: false,
+                  children: [
+                    ButtonBar(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        RaisedButton(child: Text("Clear"), onPressed: () {
+                          setState(() {
+                            _log = "";
+                          });
+                        }),
+                      ],
+                    ),
+                    Expanded(child:
+                    Container(
+                        constraints: BoxConstraints.expand(),
+                        child: Scrollbar(
+                          child: SingleChildScrollView(
+                            primary: true,
+                            scrollDirection: Axis.vertical,
+                            reverse: true,
+                            child: Text(_log,
+                                textAlign: TextAlign.left, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                          ),
+                        ))),
+                  ]),
+              EightBallWidget(),
             ],
           ),
         ),
@@ -242,6 +271,7 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
 //I might be able to populate this with serialization rather.
 @JsonSerializable()
 class Status {
+
   final double ac_input_voltage;
   final double ac_input_frequency;
   final double ac_output_voltage;
@@ -307,14 +337,23 @@ class Status {
 }
 
 Future<Status> fetchStatus() async {
-  final response = await http.get('http://theworst.zapto.org/api/status');
+    try {
+      final response = await http.get('http://theworst.zapto.org/api/status');
 
-  if (response.statusCode == 200) {
-    // If the server did return a 200 OK response, then parse the JSON.
-    return Status.fromJson(json.decode(response.body));
-  } else {
-    // If the server did not return a 200 OK response,
-    // then throw an exception.
-    throw Exception('Failed to power information from inverter');
-  }
+      if (response.statusCode == 200) {
+        // If the server did return a 200 OK response, then parse the JSON.
+        return Status.fromJson(json.decode(response.body));
+      } else {
+        log.shout(
+            "Failed to fetch power information from inverter. HTTP Code: " + response.statusCode.toString() + " - " +
+                response.body);
+        // If the server did not return a 200 OK response,
+        // then throw an exception.
+        throw Exception('Failed to power information from inverter');
+      }
+
+    } on Exception catch(e) {
+      log.shout("Failed to fetch power information from inverter. " + e.toString());
+      return Status.allZero();
+    }
 }
