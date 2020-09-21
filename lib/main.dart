@@ -16,6 +16,15 @@ import 'package:percent_indicator/linear_percent_indicator.dart';
 
 
 final log = Logger("Main");
+const int LOG_LENGTH = 10000;
+final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+class TimeSeriesWatts {
+  final DateTime time;
+  final int watts;
+
+  TimeSeriesWatts(this.time, this.watts);
+}
 
 void main() {
   runApp(SeeLightMainWidget());
@@ -24,14 +33,6 @@ void main() {
 class SeeLightMainWidget extends StatefulWidget {
   @override
   _SeeLightMainWidget createState() => _SeeLightMainWidget();
-}
-
-
-class TimeSeriesWatts {
-  final DateTime time;
-  final int watts;
-
-  TimeSeriesWatts(this.time, this.watts);
 }
 
 class _SeeLightMainWidget extends State<SeeLightMainWidget> {
@@ -73,27 +74,29 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
     super.initState();
 
     new Timer.periodic(
-        new Duration(seconds: 2),
-        (Timer t) => {
-              fetchStatus().then((value) {
-                setStatus(value);
-              })
-            });
+        new Duration(seconds: 2), (Timer t) =>
+        {
+          fetchStatus().then((value) {
+            setStatus(value);
+          })
+        });
 
     new Timer.periodic(
         new Duration(minutes: 1),
-        (Timer t) => {
-              fetchStatus().then((value) {
-                addWatts(value);
-              })
-            });
+            (Timer t) =>
+            addWatts(_inverterStatus)
+    );
 
     Logger.root.level = Level.WARNING;
     Logger.root.onRecord.listen((record) {
+      if(_log.length > LOG_LENGTH) {
+        _log = _log.replaceRange(0, _log.length - LOG_LENGTH, "...\n");
+      }
       _log += "${record.time} - [${record.level.name}]: ${record.message}\n";
     });
 
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +105,7 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
       home: DefaultTabController(
         length: 5,
         child: Scaffold(
+          key: _scaffoldKey,
           appBar: PreferredSize(
             preferredSize: Size.fromHeight(75.0),
             child: Stack(children: [
@@ -336,6 +340,9 @@ class Status {
 
 }
 
+
+//TODO: fetchErrorStatus
+
 Future<Status> fetchStatus() async {
     try {
       final response = await http.get('http://theworst.zapto.org/api/status');
@@ -350,7 +357,39 @@ Future<Status> fetchStatus() async {
       }
 
     } on Exception catch(e) {
+      showBottomSheetError("Something went wrong connecting to the inverter. Please check the log.");
       log.shout("Failed to fetch power information from inverter. " + e.toString());
       return Status.allZero();
     }
+}
+
+void showBottomSheetError(String errorMessage) {
+  showBottomSheet(errorMessage, Colors.red, "Acknowledge :( :(");
+}
+void showBottomSheetWarning(String errorMessage) {
+  showBottomSheet(errorMessage, Colors.amber, "Acknowledge :(");
+}
+
+void showBottomSheet(String errorMessage, Color color, String dismissMessage) {
+  //TODO: something so it doesn't keep showing the bottom sheet again and again
+  _scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
+    return Container(
+      height: 100,
+      color: color,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(errorMessage),
+            RaisedButton(
+              child: Text(dismissMessage),
+              onPressed: () => Navigator.pop(context),
+            )
+          ],
+        ),
+      ),
+    );
+  },
+  );
 }
