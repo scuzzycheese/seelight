@@ -344,12 +344,9 @@ Future<Status> fetchStatus() async {
         // If the server did return a 200 OK response, then parse the JSON.
         return Status.fromJson(json.decode(response.body));
       } else {
-        log.shout(
-            "Failed to fetch power information from inverter. HTTP Code: " + response.statusCode.toString() + " - " +
+        throw Exception(
+            "Can't connect to inverter. HTTP Code: " + response.statusCode.toString() + " - " +
                 response.body);
-        // If the server did not return a 200 OK response,
-        // then throw an exception.
-        throw Exception('Failed to power information from inverter');
       }
 
     } on Exception catch(e) {
