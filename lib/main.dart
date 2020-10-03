@@ -14,6 +14,8 @@ import 'package:logging/logging.dart';
 
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
+import 'errors_and_warnings.dart';
+
 
 final log = Logger("Main");
 const int LOG_LENGTH = 10000;
@@ -37,6 +39,7 @@ class SeeLightMainWidget extends StatefulWidget {
 
 class _SeeLightMainWidget extends State<SeeLightMainWidget> {
   Status _inverterStatus = Status.allZero();
+  ErrorsAndWarnings _errorsAndWarnings = ErrorsAndWarnings.allFalse();
   bool _darkMode = false;
   ThemeData _themeMode = ThemeData.light();
   String _log = "SeeLight Log.\n";
@@ -45,6 +48,12 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
   void setStatus(Status status) {
     setState(() {
       _inverterStatus = status;
+    });
+  }
+
+  void setErrorsAndWarnings(ErrorsAndWarnings errorsAndWarnings) {
+    setState(() {
+      _errorsAndWarnings = errorsAndWarnings;
     });
   }
 
@@ -80,6 +89,15 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
             setStatus(value);
           })
         });
+
+
+    new Timer.periodic(
+        new Duration(seconds: 2), (Timer t) =>
+    {
+      fetchErrorsAndWarnings().then((value) {
+        setErrorsAndWarnings(value);
+      })
+    });
 
     new Timer.periodic(
         new Duration(minutes: 1),
@@ -345,7 +363,7 @@ class Status {
 
 Future<Status> fetchStatus() async {
     try {
-      final response = await http.get('http://theworst.zapto.org/api/status');
+      final response = await http.get('http://192.168.0.122/api/status');
 
       if (response.statusCode == 200) {
         // If the server did return a 200 OK response, then parse the JSON.
@@ -361,6 +379,26 @@ Future<Status> fetchStatus() async {
       log.shout("Failed to fetch power information from inverter. " + e.toString());
       return Status.allZero();
     }
+}
+
+Future<ErrorsAndWarnings> fetchErrorsAndWarnings() async {
+  try {
+    final response = await http.get('http://192.168.0.122/api/errors_and_warnings');
+
+    if (response.statusCode == 200) {
+      // If the server did return a 200 OK response, then parse the JSON.
+      return ErrorsAndWarnings.fromJson(json.decode(response.body));
+    } else {
+      throw Exception(
+          "Can't connect to inverter. HTTP Code: " + response.statusCode.toString() + " - " +
+              response.body);
+    }
+
+  } on Exception catch(e) {
+    showBottomSheetError("Something went wrong connecting to the inverter. Please check the log.");
+    log.shout("Failed to fetch error and warning information from inverter. " + e.toString());
+    return ErrorsAndWarnings.allFalse();
+  }
 }
 
 void showBottomSheetError(String errorMessage) {
