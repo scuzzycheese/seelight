@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:SeeLight/watts_gauge.dart';
+import 'package:SeeLight/cookie.dart';
 import 'package:SeeLight/eightBall.dart';
 import 'package:flutter/rendering.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -263,7 +264,12 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
                           ),
                         ))),
                   ]),
-              EightBallWidget(),
+              GridView.count(
+                crossAxisCount: 2,
+                children: [
+                  EightBallWidget(),
+                  CookieWidget()
+                ])
             ],
           ),
         ),
