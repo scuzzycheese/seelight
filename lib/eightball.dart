@@ -2,7 +2,19 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'dart:async';
 
-final theWorstAnswers = ['¯\\_(ツ)_/¯','Sure!', 'Sure.', 'Sure...\nSure', '"Sure"', 'Sure?',':)'];
+final theWorstAnswers = [
+  '¯\\_(ツ)_/¯',
+  'Sure!',
+  'Sure.',
+  'Sure...\nSure',
+  '"Sure"',
+  'Sure?',
+  'As \nI see it, \nyes!',
+  'Don\'t \ncount \non it...',
+  'I\'m not \nhere to \njudge...',
+  'Better \nnot \ntell you \nnow...',
+  'Ask \nyour \nsister!',
+  ':)'];
 
 class EightBallWidget extends StatefulWidget {
   @override
@@ -11,6 +23,7 @@ class EightBallWidget extends StatefulWidget {
 
 class _EightBallWidget extends State<EightBallWidget> {
   String theWorstAnswer = '';
+  bool alreadyAnswered = false;
 
   @override
   Widget build(BuildContext context) {
@@ -37,21 +50,25 @@ class _EightBallWidget extends State<EightBallWidget> {
                     ),
                     GestureDetector(
                       onTap: ()  {
-                          setState(() {
-                            theWorstAnswer = theWorstAnswers[Random().nextInt(7)];
-                          });
-                          Timer(Duration(seconds: 3), () {
-                            setState(() {
-                              theWorstAnswer = '';
-                            });
-                          });
+                          if(!alreadyAnswered) {
+                              setState(() {
+                                theWorstAnswer = theWorstAnswers[Random().nextInt(theWorstAnswers.length)];
+                                alreadyAnswered = true;
+                              });
+                              Timer(Duration(seconds: 3), () {
+                                setState(() {
+                                  theWorstAnswer = '';
+                                  alreadyAnswered = false;
+                                });
+                              });
+                          }
                       },
                       child: 
                         Stack(
                           alignment: Alignment.center,
                           children: 
                           <Widget>[
-                              theWorstAnswer.isEmpty ? Image.asset('images/8ball.png') : Image.asset('images/emptyBall.png'),
+                              alreadyAnswered ? Image.asset('images/emptyBall.png') : Image.asset('images/8ball.png'),
                               Container(
                                 margin: const EdgeInsets.only(bottom: 40.0),
                                 alignment: Alignment.center,
