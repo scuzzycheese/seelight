@@ -71,9 +71,9 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
 
   void addWatts(Status status) {
     setState(() {
-      if(_watts_timeseries.length >= 1440) {
+      if(_watts_timeseries.length > 1440) {
         //Remove the last minute data point older than a day
-        _watts_timeseries.removeAt(0);
+        _watts_timeseries.removeRange(0, _watts_timeseries.length - 1440);
       }
       _watts_timeseries.last.data.add(TimeSeriesWatts(DateTime.now(), status.ac_output_watts));
     });
@@ -84,21 +84,16 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
     super.initState();
 
     new Timer.periodic(
-        new Duration(seconds: 2), (Timer t) =>
-        {
-          fetchStatus().then((value) {
-            setStatus(value);
-          })
+      new Duration(seconds: 2),
+      (Timer t) {
+        fetchStatus().then((value) {
+          setStatus(value);
         });
-
-
-    new Timer.periodic(
-        new Duration(seconds: 2), (Timer t) =>
-    {
-      fetchErrorsAndWarnings().then((value) {
-        setErrorsAndWarnings(value);
-      })
-    });
+        fetchErrorsAndWarnings().then((value) {
+          setErrorsAndWarnings(value);
+        });
+      }
+    );
 
     new Timer.periodic(
         new Duration(minutes: 1),
@@ -108,6 +103,7 @@ class _SeeLightMainWidget extends State<SeeLightMainWidget> {
 
     Logger.root.level = Level.WARNING;
     Logger.root.onRecord.listen((record) {
+      print("${record.time} - [${record.level.name}]: ${record.message}\n");
       if(_log.length > LOG_LENGTH) {
         _log = _log.replaceRange(0, _log.length - LOG_LENGTH, "...\n");
       }
