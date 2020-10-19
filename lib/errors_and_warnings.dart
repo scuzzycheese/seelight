@@ -62,6 +62,37 @@ class ErrorsAndWarnings {
       this.battery_too_low_to_charge);
 
 
+  bool anyTrue() {
+    if(this.inverter_fault) return true;
+    if(this.bus_over_fault) return true;
+    if(this.bus_under_fault) return true;
+    if(this.bus_soft_fail_fault) return true;
+    if(this.line_fail_warning) return true;
+    if(this.opv_short_warning) return true;
+    if(this.inverter_voltage_too_low_fault) return true;
+    if(this.inverter_voltage_too_high_fault) return true;
+    if(this.over_temperature) return true;
+    if(this.fan_locked) return true;
+    if(this.battery_voltage_high) return true;
+    if(this.battery_low_alarm_warning) return true;
+    if(this.battery_under_shutdown_warning) return true;
+    if(this.overload) return true;
+    if(this.eeprom_fault_warning) return true;
+    if(this.inverter_over_current_fault) return true;
+    if(this.inverter_soft_fail_fault) return true;
+    if(this.self_test_fail_fault) return true;
+    if(this.op_dc_voltage_over_fault) return true;
+    if(this.bat_open_fault) return true;
+    if(this.current_sensor_fail_fault) return true;
+    if(this.battery_short_fault) return true;
+    if(this.power_limit_warning) return true;
+    if(this.pv_voltage_high_warning) return true;
+    if(this.mppt_overload_fault_1) return true;
+    if(this.mppt_overload_warning_1) return true;
+    if(this.battery_too_low_to_charge ) return true;
+    return false;
+  }
+
   factory ErrorsAndWarnings.allFalse() {
     return ErrorsAndWarnings(
       false,
@@ -125,5 +156,6 @@ class ErrorsAndWarnings {
         json['battery_too_low_to_charge'],
     );
   }
+
 
 }
