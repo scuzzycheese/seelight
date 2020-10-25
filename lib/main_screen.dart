@@ -1,10 +1,10 @@
 import 'dart:convert';
 
+import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'errors_and_warnings.dart';
-import 'main.dart';
 import 'state.dart';
 import 'package:logging/logging.dart';
 import 'dart:async';
@@ -39,7 +39,6 @@ class MainScreenWidget extends StatefulWidget {
 class _MainScreenWidgetState extends State<MainScreenWidget> {
   Status _inverterStatus = Status.allZero();
   ErrorsAndWarnings _errorsAndWarnings = ErrorsAndWarnings.allFalse();
-  bool _darkMode = false;
   String _log = "SeeLight Log.\n";
 
 
@@ -112,8 +111,6 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
 
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -122,37 +119,22 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
         key: _scaffoldKey,
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(75.0),
-          child: Stack(children: [
-            AppBar(
-              bottom: TabBar(
-                tabs: [
-                  Tab(icon: Icon(Icons.power_settings_new_outlined)),
-                  // Tab(icon: Image(image: AssetImage("images/metrics_white.png"))),
-                  Tab(icon: Icon(Icons.assessment)),
-                  Tab(icon: Icon(Icons.security_outlined)),
-                  Tab(icon: Icon(Icons.subject)),
-                  Tab(icon: Icon(Icons.icecream)),
-                ],
-              ),
-              title: Text(
-                'SeeLight',
-                textAlign: TextAlign.center,
-              ),
+          child: AppBar(
+            bottom: TabBar(
+              tabs: [
+                Tab(icon: Icon(Icons.power_settings_new_outlined)),
+                // Tab(icon: Image(image: AssetImage("images/metrics_white.png"))),
+                Tab(icon: Icon(Icons.assessment)),
+                Tab(icon: Icon(Icons.security_outlined)),
+                Tab(icon: Icon(Icons.subject)),
+                Tab(icon: Icon(Icons.icecream)),
+              ],
             ),
-            Container(
-              alignment: Alignment.centerRight,
-              child: Switch(
-                  value: _darkMode,
-                  onChanged: (bool newValue) {
-                    setState(
-                      () {
-                        themeMode = (themeMode == ThemeData.dark()) ? ThemeData.light() : ThemeData.dark();
-                        _darkMode = newValue;
-                      },
-                    );
-                  }),
+            title: Text(
+              'SeeLight',
+              textAlign: TextAlign.center,
             ),
-          ]),
+          ),
         ),
         drawer: Drawer(
           child: ListView(
@@ -175,6 +157,15 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
                       ));
                 },
               ),
+              ListTile(
+                title: Text('Toggle Dark Mode'),
+                onTap: () {
+                  setState(() {
+                    DynamicTheme.of(context).setThemeData(Theme.of(context).brightness == Brightness.light ? ThemeData.dark() : ThemeData.light());
+                  });
+                  Navigator.pop(context);
+                },
+              ),
             ],
           ),
         ),
@@ -187,25 +178,25 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
               children: [
                 GridView.count(crossAxisCount: 2, children: [
                   SeeLightGauge(
-                    themeMode: themeMode,
+                    themeData: Theme.of(context),
                     gaugeValue: _inverterStatus.load_percent.toDouble(),
                     end: 100,
                     label: "Load %",
                   ),
                   SeeLightGauge(
-                    themeMode: themeMode,
+                    themeData: Theme.of(context),
                     gaugeValue: _inverterStatus.pv_input_current.toDouble(),
                     end: 100,
                     label: "Solar Current",
                   ),
                   SeeLightGauge(
-                    themeMode: themeMode,
+                    themeData: Theme.of(context),
                     gaugeValue: _inverterStatus.pv_input_voltage.toDouble(),
                     end: 100,
                     label: "Solar Voltage",
                   ),
                   SeeLightGauge(
-                    themeMode: themeMode,
+                    themeData: Theme.of(context),
                     gaugeValue: _inverterStatus.inverter_heatsink_temp.toDouble(),
                     end: 100,
                     label: "Heatsink Temp",
