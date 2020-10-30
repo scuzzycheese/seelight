@@ -39,7 +39,6 @@ class MainScreenWidget extends StatefulWidget {
 class _MainScreenWidgetState extends State<MainScreenWidget> {
   Status _inverterStatus = Status.allZero();
   ErrorsAndWarnings _errorsAndWarnings = ErrorsAndWarnings.allFalse();
-  String _log = "SeeLight Log.\n";
 
 
   void setStatus(Status status) {
@@ -103,10 +102,10 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
     Logger.root.level = Level.WARNING;
     Logger.root.onRecord.listen((record) {
       print("${record.time} - [${record.level.name}]: ${record.message}\n");
-      if(_log.length > LOG_LENGTH) {
-        _log = _log.replaceRange(0, _log.length - LOG_LENGTH, "...\n");
+      if(globalLog.length > LOG_LENGTH) {
+        globalLog = globalLog.replaceRange(0, globalLog.length - LOG_LENGTH, "...\n");
       }
-      _log += "${record.time} - [${record.level.name}]: ${record.message}\n";
+      globalLog += "${record.time} - [${record.level.name}]: ${record.message}\n";
     });
 
   }
@@ -114,7 +113,7 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 5,
+      length: 4,
       child: Scaffold(
         key: _scaffoldKey,
         appBar: PreferredSize(
@@ -126,7 +125,6 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
                 // Tab(icon: Image(image: AssetImage("images/metrics_white.png"))),
                 Tab(icon: Icon(Icons.assessment)),
                 Tab(icon: Icon(Icons.security_outlined)),
-                Tab(icon: Icon(Icons.subject)),
                 Tab(icon: Icon(Icons.icecream)),
               ],
             ),
@@ -144,12 +142,13 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
               DrawerHeader(
                 child: Text('Other Stuff'),
                 decoration: BoxDecoration(
-                  color: Colors.blue,
+                  color: (Theme.of(context).brightness == Brightness.light) ? Colors.lightBlue : Colors.black38,
                 ),
               ),
               ListTile(
                 title: Text('Log'),
                 onTap: () {
+                  Navigator.pop(context);
                   Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -279,35 +278,6 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
                   ))
             ]),
             Icon(Icons.security_outlined),
-            Column(
-                // primary: false,
-                children: [
-                  ButtonBar(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      RaisedButton(
-                          child: Text("Clear"),
-                          onPressed: () {
-                            setState(() {
-                              _log = "";
-                            });
-                          }),
-                    ],
-                  ),
-                  Expanded(
-                      child: Container(
-                          constraints: BoxConstraints.expand(),
-                          child: Scrollbar(
-                            child: SingleChildScrollView(
-                              primary: true,
-                              scrollDirection: Axis.vertical,
-                              reverse: true,
-                              child: Text(_log,
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                            ),
-                          ))),
-                ]),
             GridView.count(crossAxisCount: 2, children: [EightBallWidget(), CookieWidget()])
           ],
         ),
