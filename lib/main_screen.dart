@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:SeeLight/status_screen.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -69,9 +70,9 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
 
   void addWatts(Status status) {
     setState(() {
-      if(_watts_timeseries.length > 1440) {
+      if(_watts_timeseries.last.data.length > 1440) {
         //Remove the last minute data point older than a day
-        _watts_timeseries.removeRange(0, _watts_timeseries.length - 1440);
+        _watts_timeseries.last.data.removeRange(0, _watts_timeseries.last.data.length - 1440);
       }
       _watts_timeseries.last.data.add(TimeSeriesWatts(DateTime.now(), status.ac_output_watts));
     });
@@ -162,9 +163,21 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
                   setState(() {
                     DynamicTheme.of(context).setThemeData(Theme.of(context).brightness == Brightness.light ? ThemeData.dark() : ThemeData.light());
                   });
-                  Navigator.pop(context);
+                  // Navigator.pop(context);
                 },
               ),
+              ListTile(
+                title: Text("Status"),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        // builder: (context) => StatusScreen(_errorsAndWarnings.toMap()),
+                        builder: (context) => StatusScreen(stateData: _errorsAndWarnings.toMap()),
+                      ));
+                }
+              )
             ],
           ),
         ),
