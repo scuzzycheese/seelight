@@ -68,6 +68,16 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
     ),
   ];
 
+  List<charts.Series<TimeSeriesWatts, DateTime>> _watts_pv_timeseries = [
+    charts.Series(
+        id: "watts",
+        colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+        domainFn: (TimeSeriesWatts watts, _) => watts.time,
+        measureFn: (TimeSeriesWatts watts, _) => watts.watts,
+        data: []
+    ),
+  ];
+
   void addWatts(Status status) {
     setState(() {
       if(_watts_timeseries.last.data.length > 1440) {
@@ -75,6 +85,16 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
         _watts_timeseries.last.data.removeRange(0, _watts_timeseries.last.data.length - 1440);
       }
       _watts_timeseries.last.data.add(TimeSeriesWatts(DateTime.now(), status.ac_output_watts));
+    });
+  }
+
+  void addWattsPV(Status status) {
+    setState(() {
+      if(_watts_pv_timeseries.last.data.length > 1440) {
+        //Remove the last minute data point older than a day
+        _watts_pv_timeseries.last.data.removeRange(0, _watts_pv_timeseries.last.data.length - 1440);
+      }
+      _watts_pv_timeseries.last.data.add(TimeSeriesWatts(DateTime.now(), (status.pv_input_voltage * status.pv_input_current).toInt()));
     });
   }
 
@@ -96,8 +116,10 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
 
     new Timer.periodic(
         new Duration(minutes: 1),
-            (Timer t) =>
-            addWatts(_inverterStatus)
+           (Timer t) {
+              addWatts(_inverterStatus);
+              addWattsPV(_inverterStatus);
+           }
     );
 
     Logger.root.level = Level.WARNING;
@@ -197,6 +219,12 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
                   ),
                   SeeLightGauge(
                     themeData: Theme.of(context),
+                    gaugeValue: _inverterStatus.inverter_heatsink_temp.toDouble(),
+                    end: 100,
+                    label: "Heatsink Temp",
+                  ),
+                  SeeLightGauge(
+                    themeData: Theme.of(context),
                     gaugeValue: _inverterStatus.pv_input_current.toDouble(),
                     end: 100,
                     label: "Solar Current",
@@ -204,14 +232,8 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
                   SeeLightGauge(
                     themeData: Theme.of(context),
                     gaugeValue: _inverterStatus.pv_input_voltage.toDouble(),
-                    end: 100,
+                    end: 150,
                     label: "Solar Voltage",
-                  ),
-                  SeeLightGauge(
-                    themeData: Theme.of(context),
-                    gaugeValue: _inverterStatus.inverter_heatsink_temp.toDouble(),
-                    end: 100,
-                    label: "Heatsink Temp",
                   ),
                   // Image(image: AssetImage('images/battery_black.png'), ),
                 ]),
@@ -244,6 +266,21 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
                       Container(
                           padding: const EdgeInsets.all(5),
                           alignment: Alignment.centerLeft,
+                          child: Text("PV-Voltage: " + _inverterStatus.pv_input_voltage.toString() + "v",
+                              textAlign: TextAlign.left, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
+                      Container(
+                          padding: const EdgeInsets.all(5),
+                          alignment: Alignment.centerLeft,
+                          child: Text("PV-Current: " + _inverterStatus.pv_input_current.toString() + "A",
+                              textAlign: TextAlign.left, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
+                      Container(
+                          padding: const EdgeInsets.all(5),
+                          alignment: Alignment.centerLeft,
+                          child: Text("PV-Watts: " + (_inverterStatus.pv_input_current * _inverterStatus.pv_input_voltage).toString() + "W",
+                              textAlign: TextAlign.left, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
+                      Container(
+                          padding: const EdgeInsets.all(5),
+                          alignment: Alignment.centerLeft,
                           child: Text(
                               "Battery Charge Current: " + _inverterStatus.battery_charging_current.toString() + "A",
                               textAlign: TextAlign.left,
@@ -270,7 +307,7 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
                       Container(
                           padding: const EdgeInsets.all(5),
                           alignment: Alignment.center,
-                          child: Text("Watts over 1 day.",
+                          child: Text("Watt usage over 1 day.",
                               textAlign: TextAlign.center,
                               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
                       Container(
@@ -279,6 +316,26 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
                           // width: 750,
                           child: charts.TimeSeriesChart(
                             _watts_timeseries,
+                            //defaultRenderer: new charts.BarRendererConfig<DateTime>(),
+                            animate: false,
+                            customSeriesRenderers: [
+                              charts.LineRendererConfig(customRendererId: "area", includeArea: true, stacked: true)
+                            ],
+                            defaultInteractions: false,
+                            behaviors: [new charts.SelectNearest(), new charts.DomainHighlighter()],
+                          )),
+                      Container(
+                          padding: const EdgeInsets.all(5),
+                          alignment: Alignment.center,
+                          child: Text("Watt produced (PV) over 1 day.",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
+                      Container(
+                          padding: const EdgeInsets.all(10),
+                          height: 200,
+                          // width: 750,
+                          child: charts.TimeSeriesChart(
+                            _watts_pv_timeseries,
                             //defaultRenderer: new charts.BarRendererConfig<DateTime>(),
                             animate: false,
                             customSeriesRenderers: [
