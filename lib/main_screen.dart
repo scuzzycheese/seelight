@@ -94,7 +94,7 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
         //Remove the last minute data point older than a day
         _watts_pv_timeseries.last.data.removeRange(0, _watts_pv_timeseries.last.data.length - 1440);
       }
-      _watts_pv_timeseries.last.data.add(TimeSeriesWatts(DateTime.now(), (status.pv_input_voltage * status.pv_input_current).toInt()));
+      _watts_pv_timeseries.last.data.add(TimeSeriesWatts(DateTime.now(), status.pv_charging_power.toInt()));
     });
   }
 
@@ -276,7 +276,7 @@ class _MainScreenWidgetState extends State<MainScreenWidget> {
                       Container(
                           padding: const EdgeInsets.all(5),
                           alignment: Alignment.centerLeft,
-                          child: Text("PV-Watts: " + (_inverterStatus.pv_input_current * _inverterStatus.pv_input_voltage).toString() + "W",
+                          child: Text("PV-Watts: " + _inverterStatus.pv_charging_power.toString() + "W",
                               textAlign: TextAlign.left, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
                       Container(
                           padding: const EdgeInsets.all(5),

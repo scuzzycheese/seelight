@@ -19,6 +19,7 @@ class Status {
   final double pv_input_voltage;
   final double battery_voltage_from_scc;
   final int battery_discharge_current;
+  final int pv_charging_power;
 
   Status(
       this.ac_input_voltage,
@@ -36,10 +37,11 @@ class Status {
       this.pv_input_current,
       this.pv_input_voltage,
       this.battery_voltage_from_scc,
-      this.battery_discharge_current);
+      this.battery_discharge_current,
+      this.pv_charging_power);
 
   factory Status.allZero() {
-    return Status(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    return Status(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
   }
 
   factory Status.fromJson(Map<String, dynamic> json) {
@@ -59,6 +61,8 @@ class Status {
         json['pv_input_current'],
         json['pv_input_voltage'],
         json['battery_voltage_from_scc'],
-        json['battery_discharge_current']);
+        json['battery_discharge_current'],
+        json['pv_charging_power']
+    );
   }
 }
